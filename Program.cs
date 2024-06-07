@@ -6,22 +6,23 @@ using Desafiofiap;
 var client = new HttpClient();
 var request = new HttpRequestMessage(HttpMethod.Post, "https://fiap-inaugural.azurewebsites.net/fiap");
 var count = 0;
+
 while (true)
 {
     try
     {
-        if (count == 5)
-            break;
         
         var payload = new PayloadRequest(StringExtensions.GeneratorKey(), "sala_11");
-        Console.WriteLine($"{count} - {payload.Key}");
-        var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-        request.Content = content;
-        var response = await client.SendAsync(request);
+        
+        request.Content = StringExtensions.BuildPayload(payload);
+        Console.WriteLine($"{count} - {payload.Key} - {DateTime.Now.ToString("dd/MM/yy HH:mm:ss")}");
+        var response = client.Send(request);
         response.EnsureSuccessStatusCode();
+        count = count + 1;
+        
         if (!response.Content.ReadAsStringAsync().Result.Contains("Tente novamente grupo:"))
         {
-            break;
+            return;
         }
         
     }
@@ -30,5 +31,5 @@ while (true)
         Console.Write(ex.Message);
     }
 
-    count =+ 1;
+    
 }
